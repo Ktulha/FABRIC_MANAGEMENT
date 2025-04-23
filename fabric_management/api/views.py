@@ -2,9 +2,9 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import User
 
-from .models import Fabric, FabricType, Product, ProductBP
+from .models import BlueprintFabric, Fabric, FabricType, Product, ProductBP
 
-from .serializers import FabricSerializer, FabricTypeSerializer, ProductBPSerializer,  ProductSerializer, UserSerializer
+from .serializers import BlueprintFabricSerializer, FabricSerializer, FabricTypeSerializer, ProductBPSerializer,  ProductSerializer, UserSerializer
 
 # Create your views here.
 
@@ -43,3 +43,8 @@ class ProductBPViewSet(viewsets.ModelViewSet):
     serializer_class = ProductBPSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
+
+
+class BlueprintFabricViewSet(viewsets.ModelViewSet):
+    queryset = BlueprintFabric.objects.all()
+    serializer_class = BlueprintFabricSerializer
