@@ -6,7 +6,7 @@ class FabricType(models.Model):
     name = models.CharField(max_length=256, unique=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
 
 
 class Fabric(models.Model):
@@ -20,7 +20,7 @@ class Fabric(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
 
 
 class Product(models.Model):
@@ -29,7 +29,7 @@ class Product(models.Model):
     barcode = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.name
+        return f'{self.name}'
 
 
 class ProductBP(models.Model):
