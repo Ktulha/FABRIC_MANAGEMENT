@@ -2,9 +2,9 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import User
 
-from .models import Blueprint, BlueprintItem, Material, MaterialSubType, MaterialType
+from .models import Blueprint, BlueprintItem, Material, MaterialSubType, MaterialType, Shipment
 
-from .serializers import BlueprintItemSerializer, BlueprintSerializer, MaterialSerializer, MaterialSubTypeSerializer, MaterialTypeSerializer, UserSerializer
+from .serializers import BlueprintItemSerializer, BlueprintSerializer, MaterialSerializer, MaterialSubTypeSerializer, MaterialTypeSerializer, ShipmentSerializer, UserSerializer
 
 
 class MaterialTypeViewSet(viewsets.ModelViewSet):
@@ -46,6 +46,13 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     # permission_classes = []
+    pagination_class = None
+    http_method_names = ['get', 'post', 'put', 'delete']
+
+
+class ShipmentViewSet(viewsets.ModelViewSet):
+    queryset = Shipment.objects.all()
+    serializer_class = ShipmentSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
 
