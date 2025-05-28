@@ -1,14 +1,17 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import FabricTypeViewSet, FabricViewSet, ProductBPViewSet, ProductViewSet, UserViewSet
+from .models import MaterialType
+
+from .views import BlueprintItemViewSet, BlueprintViewSet, MaterialSubTypeViewSet, MaterialTypeViewSet, MaterialViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register('users', UserViewSet)
-router.register('fabric_types', FabricTypeViewSet)
-router.register('fabrics', FabricViewSet)
-router.register('products', ProductViewSet)
-router.register('blueprints', ProductBPViewSet)
+router.register('material_types', MaterialTypeViewSet)
+router.register('material_Sub_types', MaterialSubTypeViewSet)
+router.register('blueprint_items', BlueprintItemViewSet)
+router.register('materials', MaterialViewSet)
+router.register('blueprints', BlueprintViewSet)
 
 urlpatterns = [
 

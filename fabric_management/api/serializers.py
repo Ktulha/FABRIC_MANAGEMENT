@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Fabric, FabricType, Product, ProductBP, BlueprintFabric, Shipment, ShipmentItem, Stock, Sales
+from .models import Blueprint, BlueprintItem, Material, MaterialSubType, MaterialType
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -10,57 +10,31 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'username')
 
 
-class FabricTypeSerializer(serializers.ModelSerializer):
+class BlueprintSerializer(serializers.ModelSerializer):
     class Meta:
-        model = FabricType
+        model = Blueprint
         fields = '__all__'
 
 
-class FabricSerializer(serializers.ModelSerializer):
+class MaterialTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Fabric
+        model = MaterialType
         fields = '__all__'
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class MaterialSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = Material
         fields = '__all__'
 
 
-class BlueprintFabricSerializer(serializers.ModelSerializer):
+class BlueprintItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BlueprintFabric
+        model = BlueprintItem
         fields = '__all__'
 
 
-class ProductBPSerializer(serializers.ModelSerializer):
-    fabrics = BlueprintFabricSerializer(many=True)
-
+class MaterialSubTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ProductBP
-        fields = fields = '__all__'
-
-
-class ShipmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Shipment
-        fields = '__all__'
-
-
-class ShipmentItemSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ShipmentItem
-        fields = '__all__'
-
-
-class StockSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stock
-        fields = '__all__'
-
-
-class SalesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sales
+        model = MaterialSubType
         fields = '__all__'
