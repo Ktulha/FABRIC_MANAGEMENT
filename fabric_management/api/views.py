@@ -2,9 +2,9 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from django.contrib.auth.models import User
 
-from .models import Blueprint, BlueprintItem, Material, MaterialSubType, MaterialType, Shipment
+from .models import Blueprint, BlueprintItem, ManufacturePlan, ManufacturePlanItem, ManufactureResource, Material, MaterialSubType, MaterialType, Shipment
 
-from .serializers import BlueprintItemSerializer, BlueprintSerializer, MaterialSerializer, MaterialSubTypeSerializer, MaterialTypeSerializer, ShipmentSerializer, UserSerializer
+from .serializers import BlueprintItemSerializer, BlueprintSerializer, ManufacturePlanItemSerializer, ManufacturePlanSerializer, ManufactureResourceSerializer, MaterialSerializer, MaterialSubTypeSerializer, MaterialTypeSerializer, ShipmentSerializer, UserSerializer
 
 
 class MaterialTypeViewSet(viewsets.ModelViewSet):
@@ -12,6 +12,7 @@ class MaterialTypeViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialTypeSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
 class BlueprintViewSet(viewsets.ModelViewSet):
@@ -19,6 +20,7 @@ class BlueprintViewSet(viewsets.ModelViewSet):
     serializer_class = BlueprintSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
 class MaterialViewSet(viewsets.ModelViewSet):
@@ -26,6 +28,7 @@ class MaterialViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
 class BlueprintItemViewSet(viewsets.ModelViewSet):
@@ -33,6 +36,7 @@ class BlueprintItemViewSet(viewsets.ModelViewSet):
     serializer_class = BlueprintItemSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
 class MaterialSubTypeViewSet(viewsets.ModelViewSet):
@@ -40,12 +44,13 @@ class MaterialSubTypeViewSet(viewsets.ModelViewSet):
     serializer_class = MaterialSubTypeSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = []
+    permission_classes = []
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
 
@@ -55,42 +60,28 @@ class ShipmentViewSet(viewsets.ModelViewSet):
     serializer_class = ShipmentSerializer
     pagination_class = None
     http_method_names = ['get', 'post', 'put', 'delete']
-
-# from .models import BlueprintFabric, Fabric, FabricType, Product, ProductBP
-
-# from .serializers import BlueprintFabricSerializer, FabricSerializer, FabricTypeSerializer, ProductBPSerializer,  ProductSerializer, UserSerializer
-
-# # Create your views here.
+    permission_classes = []
 
 
-# class FabricTypeViewSet(viewsets.ModelViewSet):
-#     queryset = FabricType.objects.all()
-#     serializer_class = FabricTypeSerializer
-#     pagination_class = None
-#     http_method_names = ['get', 'post', 'put', 'delete']
+class ManufactureResourceViewSet(viewsets.ModelViewSet):
+    queryset = ManufactureResource.objects.all()
+    serializer_class = ManufactureResourceSerializer
+    pagination_class = None
+    http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
-# class FabricViewSet(viewsets.ModelViewSet):
-#     queryset = Fabric.objects.all()
-#     serializer_class = FabricSerializer
-#     pagination_class = None
-#     http_method_names = ['get', 'post', 'put', 'delete']
+class ManufacturePlanViewSet(viewsets.ModelViewSet):
+    queryset = ManufacturePlan.objects.all()
+    serializer_class = ManufacturePlanSerializer
+    pagination_class = None
+    http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
 
 
-# class ProductViewSet(viewsets.ModelViewSet):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializer
-#     pagination_class = None
-#     http_method_names = ['get', 'post', 'put', 'delete']
-
-
-# class ProductBPViewSet(viewsets.ModelViewSet):
-#     queryset = ProductBP.objects.all()
-#     serializer_class = ProductBPSerializer
-#     pagination_class = None
-#     http_method_names = ['get', 'post', 'put', 'delete']
-
-
-# class BlueprintFabricViewSet(viewsets.ModelViewSet):
-#     queryset = BlueprintFabric.objects.all()
-#     serializer_class = BlueprintFabricSerializer
+class ManufacturePlanItemViewSet(viewsets.ModelViewSet):
+    queryset = ManufacturePlanItem.objects.all()
+    serializer_class = ManufacturePlanItemSerializer
+    pagination_class = None
+    http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = []
