@@ -1,14 +1,18 @@
-from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from .views import FabricTypeViewSet, FabricViewSet, ProductBPViewSet, ProductViewSet, UserViewSet
+from .views import BlueprintItemViewSet, BlueprintViewSet, ManufacturePlanItemViewSet, ManufacturePlanViewSet, ManufactureResourceViewSet, MaterialSubTypeViewSet, MaterialTypeViewSet, MaterialViewSet, ShipmentViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register('users', UserViewSet)
-router.register('fabric_types', FabricTypeViewSet)
-router.register('fabrics', FabricViewSet)
-router.register('products', ProductViewSet)
-router.register('blueprints', ProductBPViewSet)
+router.register('material_types', MaterialTypeViewSet)
+router.register('material_Sub_types', MaterialSubTypeViewSet)
+router.register('blueprint_items', BlueprintItemViewSet)
+router.register('materials', MaterialViewSet)
+router.register('blueprints', BlueprintViewSet)
+router.register('shipments', ShipmentViewSet)
+router.register('manufacture_resources', ManufactureResourceViewSet)
+router.register('manufacture_plans', ManufacturePlanViewSet)
+router.register('manufacture_plan_items', ManufacturePlanItemViewSet)
 
 urlpatterns = [
 
