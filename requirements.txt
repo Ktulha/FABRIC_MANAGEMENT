@@ -20,8 +20,12 @@ djangorestframework==3.16.0
     #   djangorestframework-simplejwt
 djangorestframework-simplejwt==5.5.0
     # via -r requirements.in
+gunicorn==23.0.0
+    # via -r requirements.in
 numpy==2.2.5
     # via pandas
+packaging==25.0
+    # via gunicorn
 pandas==2.2.3
     # via -r requirements.in
 pillow==11.2.1
