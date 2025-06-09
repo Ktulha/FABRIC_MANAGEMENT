@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
-from .models import Blueprint, BlueprintItem, ManufacturePlan, ManufacturePlanItem, ManufactureResource, Material, MaterialSubType, MaterialType, Shipment
+from .models import Blueprint, BlueprintItem, ManufacturePlan, ManufacturePlanItem, ManufactureResource, Material, MaterialSubType, MaterialType, Shipment, ShipmentItem
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -43,6 +43,12 @@ class MaterialSubTypeSerializer(serializers.ModelSerializer):
 class ShipmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shipment
+        fields = '__all__'
+
+
+class ShipmentItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShipmentItem
         fields = '__all__'
 
 
