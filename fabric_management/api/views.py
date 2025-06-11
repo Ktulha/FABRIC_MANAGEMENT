@@ -1,95 +1,112 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from django.contrib.auth.models import User
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
-from .models import Blueprint, BlueprintItem, ManufacturePlan, ManufacturePlanItem, ManufactureResource, Material, MaterialSubType, MaterialType, Shipment, ShipmentItem
+from .models import Blueprint, BlueprintItem, ManufacturePlan, ManufacturePlanItem, ManufactureResource, Material, MaterialSubType, MaterialType, Shipment, ShipmentItem, MaterialVariant, Stock, SalePlace, SaleTransaction, ResourcePlan
 
-from .serializers import BlueprintItemSerializer, BlueprintSerializer, ManufacturePlanItemSerializer, ManufacturePlanSerializer, ManufactureResourceSerializer, MaterialSerializer, MaterialSubTypeSerializer, MaterialTypeSerializer, ShipmentItemSerializer, ShipmentSerializer, UserSerializer
+from .serializers import BlueprintItemSerializer, BlueprintSerializer, ManufacturePlanItemSerializer, ManufacturePlanSerializer, ManufactureResourceSerializer, MaterialSerializer, MaterialSubTypeSerializer, MaterialTypeSerializer, ShipmentItemSerializer, ShipmentSerializer, UserSerializer, MaterialVariantSerializer, StockSerializer, SalePlaceSerializer, SaleTransactionSerializer, ResourcePlanSerializer, UserRegisterSerializer
 
 
-class MaterialTypeViewSet(viewsets.ModelViewSet):
+class BaseModelViewSet(viewsets.ModelViewSet):
+    """
+    Base viewset with common settings for all model viewsets.
+    """
+    pagination_class = None
+    http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = [IsAuthenticated]
+
+
+class MaterialTypeViewSet(BaseModelViewSet):
     queryset = MaterialType.objects.all()
     serializer_class = MaterialTypeSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class BlueprintViewSet(viewsets.ModelViewSet):
+class BlueprintViewSet(BaseModelViewSet):
     queryset = Blueprint.objects.all()
     serializer_class = BlueprintSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class MaterialViewSet(viewsets.ModelViewSet):
+class MaterialViewSet(BaseModelViewSet):
     queryset = Material.objects.all()
     serializer_class = MaterialSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class BlueprintItemViewSet(viewsets.ModelViewSet):
+class BlueprintItemViewSet(BaseModelViewSet):
     queryset = BlueprintItem.objects.all()
     serializer_class = BlueprintItemSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class MaterialSubTypeViewSet(viewsets.ModelViewSet):
+class MaterialSubTypeViewSet(BaseModelViewSet):
     queryset = MaterialSubType.objects.all()
     serializer_class = MaterialSubTypeSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(BaseModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = []
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = [IsAdminUser]
 
 
-class ShipmentViewSet(viewsets.ModelViewSet):
+class ShipmentViewSet(BaseModelViewSet):
     queryset = Shipment.objects.all()
     serializer_class = ShipmentSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class ShipmentItemViewSet(viewsets.ViewSet):
+class ShipmentItemViewSet(BaseModelViewSet):
     queryset = ShipmentItem.objects.all()
     serializer_class = ShipmentItemSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class ManufactureResourceViewSet(viewsets.ModelViewSet):
+class ManufactureResourceViewSet(BaseModelViewSet):
     queryset = ManufactureResource.objects.all()
     serializer_class = ManufactureResourceSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class ManufacturePlanViewSet(viewsets.ModelViewSet):
+class ManufacturePlanViewSet(BaseModelViewSet):
     queryset = ManufacturePlan.objects.all()
     serializer_class = ManufacturePlanSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
 
 
-class ManufacturePlanItemViewSet(viewsets.ModelViewSet):
+class ManufacturePlanItemViewSet(BaseModelViewSet):
     queryset = ManufacturePlanItem.objects.all()
     serializer_class = ManufacturePlanItemSerializer
-    pagination_class = None
-    http_method_names = ['get', 'post', 'put', 'delete']
-    permission_classes = []
+
+
+class MaterialVariantViewSet(BaseModelViewSet):
+    queryset = MaterialVariant.objects.all()
+    serializer_class = MaterialVariantSerializer
+
+
+class StockViewSet(BaseModelViewSet):
+    queryset = Stock.objects.all()
+    serializer_class = StockSerializer
+
+
+class SalePlaceViewSet(BaseModelViewSet):
+    queryset = SalePlace.objects.all()
+    serializer_class = SalePlaceSerializer
+
+
+class SaleTransactionViewSet(BaseModelViewSet):
+    queryset = SaleTransaction.objects.all()
+    serializer_class = SaleTransactionSerializer
+
+
+class ResourcePlanViewSet(BaseModelViewSet):
+    queryset = ResourcePlan.objects.all()
+    serializer_class = ResourcePlanSerializer
+
+
+class UserRegisterView(generics.CreateAPIView):
+    """
+    API view to register a new user.
+    """
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = UserRegisterSerializer
+
+    def get(self, request, *args, **kwargs):
+        from rest_framework.response import Response
+        from rest_framework import status
+        return Response({"detail": "Method \"GET\" not allowed."}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
