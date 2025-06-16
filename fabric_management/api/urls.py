@@ -21,6 +21,7 @@ router.register('sale_places', SalePlaceViewSet)
 router.register('sale_transactions', SaleTransactionViewSet)
 router.register('resource_plans', ResourcePlanViewSet)
 
+
 urlpatterns = [
     path('register/', UserRegisterView.as_view(), name='user-register'),
 

@@ -1,3 +1,4 @@
+from django.db.models import Sum
 import datetime
 from django.db import models
 from django.contrib.auth.models import User
@@ -132,8 +133,7 @@ class Blueprint(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_result = models.BooleanField(default=False)
-    average_execution_time = models.TimeField(
-        auto_now=False, auto_now_add=False, null=True)
+    average_execution_time = models.TimeField(null=True)
     minimal_day_production = models.PositiveIntegerField(default=0)
     max_day_production = models.PositiveIntegerField(default=1)
     resource = models.ForeignKey(
@@ -294,44 +294,6 @@ class BlueprintItem(models.Model):
         return f'{self.material}:{self.amount}'
 
 
-class BlueprintItem(models.Model):
-    """
-    Модель, представляющая элемент чертежа с материалом и количеством.
-
-    Атрибуты:
-        blueprint (ForeignKey): Внешний ключ на чертеж.
-        material (ForeignKey): Внешний ключ на материал.
-        amount (FloatField): Количество материала.
-
-    Метаданные:
-        unique_together: Уникальность по чертежу и материалу.
-
-    Методы:
-        clean(): Проверяет, что количество не отрицательное.
-        save(): Сохраняет объект с валидацией.
-        __str__(): Возвращает строковое представление элемента.
-    """
-    blueprint = models.ForeignKey(
-        Blueprint, related_name='items', on_delete=models.CASCADE)
-    material = models.ForeignKey(
-        Material, related_name='items', on_delete=models.CASCADE)
-    amount = models.FloatField(default=0)
-
-    class Meta:
-        unique_together = ('blueprint', 'material')
-
-    def clean(self):
-        if self.amount < 0:
-            raise ValidationError('Amount cannot be negative')
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f'{self.material}:{self.amount}'
-
-
 class Shipment(models.Model):
     """
     Модель, представляющая отгрузку с информацией о статусе и пользователе.
@@ -419,11 +381,25 @@ class ResourcePlan(models.Model):
         ManufacturePlan, related_name='resource_plan_items', on_delete=models.CASCADE)
     resource = models.ForeignKey(
         ManufactureResource, related_name='resource_plan_items', on_delete=models.CASCADE)
-    slots = models.PositiveIntegerField(default=1)
+    total_slots = models.PositiveIntegerField(default=1)
+    used_slots = models.PositiveIntegerField(default=0, null=True)
     extra_slots = models.PositiveIntegerField(default=0)
 
     class Meta:
         unique_together = ('manufacture_plan', 'resource')
+
+    def save(self, *args, **kwargs):
+
+        self.total_slots = self.resource.work_slot_count
+        total_used_slots = self.resource_plan_items.aggregate(
+            total=Sum('used_slots'))['total']
+        self.used_slots = total_used_slots or 0
+        ex_slots = self.used_slots-self.total_slots
+        if ex_slots > 0:
+            self.extra_slots = ex_slots
+        else:
+            self.extra_slots = 0
+        super().save(*args, **kwargs)
 
 
 class ManufacturePlanItem(models.Model):
@@ -451,12 +427,17 @@ class ManufacturePlanItem(models.Model):
     material = models.ForeignKey(
         Material, related_name='plan_items', on_delete=models.CASCADE)
     amount = models.PositiveIntegerField(default=0)
-    extra_slot = models.PositiveIntegerField(default=0)
+    extra_slot = models.PositiveIntegerField(default=0, null=True)
     priority = models.CharField(
         max_length=50, choices=PRIORITY_LIST, default='medium')
     status = models.CharField(
         max_length=50, choices=PLAN_STATUSES, default='pending')
     stock_amount = models.PositiveIntegerField(default=0)
+    resource_plan = models.ForeignKey(
+        ResourcePlan, related_name='resource_plan_items', on_delete=models.SET_NULL, null=True)
+    average_time = models.DurationField(null=True)
+    used_slots = models.DecimalField(
+        max_digits=15, decimal_places=3, default=0)
 
     class Meta:
         unique_together = ('manufacture_plan', 'material')
@@ -479,11 +460,15 @@ class ManufacturePlanItem(models.Model):
                     manufacture_plan=self.manufacture_plan,
                     resource=self.material.blueprint.resource
                 )
-                res.slots += 1
-                if res.resource.work_slot_count < res.slots:
-                    self.extra_slot, res.extra_slots = res.slots-res.resource.work_slot_count
-
                 res.save()
+            self.resource_plan = res
+
+            self.average_time = datetime.timedelta(
+                seconds=self.material.blueprint.average_execution_time.total_seconds()*self.amount)
+            self.used_slots = self.average_time.total_seconds(
+            )/self.material.blueprint.resource.maximum_slot_time.total_seconds()
+            # Removed recursive save call here
+
         if self.status == 'finished':
             stock, created = Stock.objects.get_or_create(
                 date=self.manufacture_plan.date,
@@ -521,7 +506,6 @@ class ManufacturePlanItem(models.Model):
 
 
 # продажи
-
 
 class SalePlace(models.Model):
     """
