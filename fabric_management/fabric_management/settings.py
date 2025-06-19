@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     'django_filters',
     # Наше приложение
     'api.apps.ApiConfig',
-    # 'datawork.apps.DataworkConfig',
+    'warehouse.apps.WarehouseConfig',
     'sales.apps.SalesConfig',
+    'main.apps.MainConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',
