@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-kv&=xs+74s1)@_4^x$&t79h$rwp6jeo7@r%3wq9y-1#(j%++0k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['fabric-management.local', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['fabric-management.local',
+                 'localhost', '127.0.0.1', '192.168.18.17']
 
 
 # Application definition
@@ -37,7 +38,8 @@ INSTALLED_APPS = [
     'django_filters',
     # Наше приложение
     'api.apps.ApiConfig',
-    'datawork.apps.DataworkConfig',
+    # 'datawork.apps.DataworkConfig',
+    'sales.apps.SalesConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',

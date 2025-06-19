@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class DataworkConfig(AppConfig):
+class SalesConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'datawork'
+    name = 'sales'
