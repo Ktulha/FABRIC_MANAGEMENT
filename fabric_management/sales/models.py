@@ -9,6 +9,16 @@ class Product(models.Model):
     image = models.ImageField(upload_to='products', null=True)
     url = models.CharField(max_length=255, blank=True)
     barcode = models.CharField(max_length=50, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_values = models.TextField(blank=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            # Объект уже существует, поэтому мы обновляем его
+            old_values = Product.objects.get(pk=self.pk)
+            self.last_values = f'name: {old_values.name}, barcode: {old_values.barcode}, description: {old_values.description}, image: {old_values.image}, url: {old_values.url}'
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.name}({self.barcode})'
@@ -17,7 +27,7 @@ class Product(models.Model):
 class Region(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    code = models.CharField(max_length=50)
+    code = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return f'({self.code}) {self.name}'

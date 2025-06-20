@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Load Stock Data</title>
+</head>
+<body>
+    поля: {stock_date,region,region_code,product,product_barcode,warehouse,warehouse_code,quantity}
+<br/>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file">
+        <button type="submit">Load Data</button>
+    </form>
+</body>
+</html>

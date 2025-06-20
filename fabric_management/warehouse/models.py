@@ -7,7 +7,7 @@ from sales.models import Product, Region
 
 class Warehouse(models.Model):
     name = models.CharField(max_length=255)
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True)
     description = models.TextField(blank=True, null=True)
     code = models.CharField(max_length=10, unique=True)
 
