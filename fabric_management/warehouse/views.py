@@ -8,13 +8,14 @@ from .serializers import WarehouseSerializer, StockTransactionSerializer
 from .models import Warehouse, StockTransaction
 
 # Create your views here.
+# from rest_framework.pagination import PageNumberPagination
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     """
     Base viewset with common settings for all model viewsets.
     """
-    pagination_class = None
+    # pagination_class = PageNumberPagination
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [AllowAny]
 

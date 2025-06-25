@@ -1,10 +1,10 @@
 import datetime
 from os import name
-from django.shortcuts import render
 import csv
 import json
 from django.shortcuts import render
 from django.http import HttpResponse
+import numpy as np
 
 from warehouse.models import StockTransaction, Warehouse
 from sales.models import Product, Region, Sale, SaleObject
@@ -18,67 +18,133 @@ def load_sales(request):
     if request.method == 'POST':
         file = request.FILES['file']
         if file.name.endswith('.csv'):
+            delim = ';'
             decoded_file = file.read().decode('utf-8-sig').splitlines()
+            reader = csv.DictReader(decoded_file, delimiter=delim)
 
-            reader = csv.DictReader(decoded_file)
-            # reader = csv.reader(decoded_file)
-            print(reader)
+            # Collect data from CSV
+            products_data = {}
+            regions_data = {}
+            sale_objects_data = {}
+            sales_data = []
+
             for row in reader:
+                sale_object = row['sale_object']
+                region = row['region']
+                region_code = row['region_code']
+                product = row['product'].replace('\\', '')
+                print(product)
+                product_barcode = row['product_barcode']
+                date = datetime.datetime.strptime(
+                    row['date'], '%d.%m.%Y').date()
+                quantity = float(row['quantity'].replace(',', '.'))
 
-                keys = list(row.keys())[0].split(';')
-                # print(keys)
-                values = list(row.values())[0].split(';')
-                # print(values)
-                d = dict(zip(keys, values))
+                if not quantity or quantity == np.nan:
+                    quantity = 0
+                try:
+                    quantity = 0+int(quantity)
+                except:
+                    quantity = 0
 
-                # fill values
-                sale_object = d['sale_object']
-                region = d['region']
-                region_code = d['region_code']
-                product = d['product']
-                product_barcode = d['product_barcode']
-                date = datetime.datetime.strptime(d['date'], '%d.%m.%Y').date()
-                quantity = d['quantity']
+                products_data[product_barcode] = product
+                regions_data[region_code] = region
+                sale_objects_data[sale_object] = sale_object
+                sales_data.append({
+                    'date': date,
+                    'region_code': region_code,
+                    'product_barcode': product_barcode,
+                    'sale_object_name': sale_object,
+                    'quantity': quantity
+                })
 
-                # print(sale_object, region, region_code,
-                #   product, product_barcode, date, quantity)
-                # prod, created = Product.objects.get_or_create(
-                #     barcode=product_barcode)
-                # print(prod)
+            # Bulk get or create Products
+            print("Bulk get or create Products")
+            existing_products = Product.objects.filter(
+                barcode__in=products_data.keys())
+            existing_products_dict = {p.barcode: p for p in existing_products}
+            products_to_create = []
+            for barcode, name in products_data.items():
+                if barcode not in existing_products_dict:
+                    products_to_create.append(
+                        Product(barcode=barcode, name=name))
+            Product.objects.bulk_create(products_to_create)
+            # Refresh existing_products_dict after bulk_create
+            print("Refresh existing_products_dict after bulk_create")
+            all_products = Product.objects.filter(
+                barcode__in=products_data.keys())
+            products_dict = {p.barcode: p for p in all_products}
 
-                # product
-                prod, created = Product.objects.get_or_create(
-                    barcode=product_barcode)
-                if not prod:
-                    prod = Product.objects.create(
-                        barcode=product_barcode, name=product)
-                prod.name = product
-                prod.save()
+            # Bulk get or create Regions
+            print("Bulk get or create Regions")
+            existing_regions = Region.objects.filter(
+                code__in=regions_data.keys())
+            existing_regions_dict = {r.code: r for r in existing_regions}
+            regions_to_create = []
+            for code, name in regions_data.items():
+                if code not in existing_regions_dict:
+                    regions_to_create.append(Region(code=code, name=name))
+            Region.objects.bulk_create(regions_to_create)
+            # Refresh regions_dict after bulk_create
+            print("Refresh regions_dict after bulk_create")
+            all_regions = Region.objects.filter(code__in=regions_data.keys())
+            regions_dict = {r.code: r for r in all_regions}
 
-                # region
-                reg, created = Region.objects.get_or_create(code=region_code)
-                if not reg:
-                    reg = Region.objects.create(
-                        name=region, code=region_code)
-                reg.name = region
-                reg.save()
-                # sale object
-                sale_obj, created = SaleObject.objects.get_or_create(
-                    name=sale_object)
-                if not sale_obj:
-                    sale_obj = SaleObject.objects.create(
-                        name=sale_object)
-                sale_obj.name = sale_object
-                sale_obj.save()
-                # sale
-                sale, ceated = Sale.objects.get_or_create(
-                    date=date, region=reg, product=prod, sale_object=sale_obj)
-                if not sale:
-                    sale = Sale.objects.create(
-                        date=date, region=reg, product=prod, sale_object=sale_obj, quantity=quantity)
+            # Bulk get or create SaleObjects
+            print("Bulk get or create SaleObjects")
+            existing_sale_objects = SaleObject.objects.filter(
+                name__in=sale_objects_data.keys())
+            existing_sale_objects_dict = {
+                so.name: so for so in existing_sale_objects}
+            sale_objects_to_create = []
+            for name in sale_objects_data.keys():
+                if name not in existing_sale_objects_dict:
+                    sale_objects_to_create.append(SaleObject(name=name))
+            SaleObject.objects.bulk_create(sale_objects_to_create)
+            # Refresh sale_objects_dict after bulk_create
+            print("Refresh sale_objects_dict after bulk_create")
+            all_sale_objects = SaleObject.objects.filter(
+                name__in=sale_objects_data.keys())
+            sale_objects_dict = {so.name: so for so in all_sale_objects}
 
-                sale.quantity = quantity
-                sale.save()
+            # Prepare sales for bulk create or update
+            # Fetch existing sales
+            print("Fetch existing sales")
+            existing_sales = Sale.objects.filter(
+                date__in=[s['date'] for s in sales_data],
+                region__code__in=[s['region_code'] for s in sales_data],
+                product__barcode__in=[s['product_barcode']
+                                      for s in sales_data],
+                sale_object__name__in=[s['sale_object_name']
+                                       for s in sales_data]
+            )
+            existing_sales_dict = {}
+            for sale in existing_sales:
+                key = (sale.date, sale.region.code,
+                       sale.product.barcode, sale.sale_object.name)
+                existing_sales_dict[key] = sale
+
+            sales_to_create = []
+            sales_to_update = []
+            for s in sales_data:
+                key = (s['date'], s['region_code'],
+                       s['product_barcode'], s['sale_object_name'])
+                if key in existing_sales_dict:
+                    sale_obj = existing_sales_dict[key]
+                    sale_obj.quantity = s['quantity']
+                    sales_to_update.append(sale_obj)
+                else:
+                    sales_to_create.append(Sale(
+                        date=s['date'],
+                        region=regions_dict[s['region_code']],
+                        product=products_dict[s['product_barcode']],
+                        sale_object=sale_objects_dict[s['sale_object_name']],
+                        quantity=s['quantity']
+                    ))
+
+            if sales_to_create:
+                Sale.objects.bulk_create(sales_to_create)
+            if sales_to_update:
+                Sale.objects.bulk_update(sales_to_update, ['quantity'])
 
         elif file.name.endswith('.json'):
             # TODO JSON format data file load script
@@ -86,7 +152,6 @@ def load_sales(request):
 
         else:
             return HttpResponse('Unsupported file format')
-        # HttpResponse('Data loaded successfully')
         return render(request, 'index.html')
     return render(request, 'load_sales.html')
 

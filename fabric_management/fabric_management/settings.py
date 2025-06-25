@@ -36,12 +36,15 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
+
+
     # Наше приложение
     'api.apps.ApiConfig',
     'warehouse.apps.WarehouseConfig',
     'sales.apps.SalesConfig',
     'main.apps.MainConfig',
 
+    # стандартные
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

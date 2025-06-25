@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics
+# from rest_framework.pagination import PageNumberPagination
 from django.contrib.auth.models import User
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
@@ -13,7 +14,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     """
     Base viewset with common settings for all model viewsets.
     """
-    pagination_class = None
+    # pagination_class = PageNumberPagination
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [AllowAny]
 
