@@ -160,63 +160,124 @@ def load_stock(request):
     if request.method == 'POST':
         file = request.FILES['file']
         if file.name.endswith('.csv'):
+            delim = ';'
             decoded_file = file.read().decode('utf-8-sig').splitlines()
+            reader = csv.DictReader(decoded_file, delimiter=delim)
 
-            reader = csv.DictReader(decoded_file)
+            # Collect data from CSV
+            products_data = {}
+            regions_data = {}
+            warehouses_data = {}
+            stock_transactions_data = []
 
             for row in reader:
-                keys = list(row.keys())[0].split(';')
-                # print(keys)
-                values = list(row.values())[0].split(';')
-                # print(values)
-                d = dict(zip(keys, values))
                 stock_date = datetime.datetime.strptime(
-                    d['stock_date'], '%d.%m.%Y').date()
-                product_barcode = d['product_barcode']
-                product = d['product']
-                region = d['region']
-                region_code = d['region_code']
-                warehouse = d['warehouse']
-                warehouse_code = d['warehouse_code']
-                quantity = d['quantity']
+                    row['stock_date'], '%d.%m.%Y').date()
+                product_barcode = row['product_barcode']
+                product = row['product']
+                region = row['region']
+                region_code = row['region_code']
+                warehouse = row['warehouse']
+                warehouse_code = row['warehouse_code']
+                quantity = row['quantity']
+                if quantity:
+                    quantity = float(row['quantity'].replace(',', '.'))
+                else:
+                    quantity = 0
 
-                # product
-                prod, created = Product.objects.get_or_create(
-                    barcode=product_barcode)
-                if not prod:
-                    prod = Product.objects.create(
-                        barcode=product_barcode, name=product)
-                prod.name = product
-                prod.save()
+                products_data[product_barcode] = product
+                regions_data[region_code] = region
+                warehouses_data[warehouse_code] = {
+                    'name': warehouse,
+                    'region_code': region_code
+                }
+                stock_transactions_data.append({
+                    'stock_date': stock_date,
+                    'product_barcode': product_barcode,
+                    'warehouse_code': warehouse_code,
+                    'quantity': quantity
+                })
 
-                # region
-                reg, created = Region.objects.get_or_create(code=region_code)
-                if not reg:
-                    reg = Region.objects.create(
-                        name=region, code=region_code)
-                reg.name = region
-                reg.save()
-                # warehouse
-                ware, created = Warehouse.objects.get_or_create(
-                    code=warehouse_code)
-                if not ware:
-                    ware = Warehouse.objects.create(
-                        name=warehouse, code=warehouse_code)
-                ware.name = warehouse
-                ware.region = reg
-                ware.save()
+            # Bulk get or create Products
+            existing_products = Product.objects.filter(
+                barcode__in=products_data.keys())
+            existing_products_dict = {p.barcode: p for p in existing_products}
+            products_to_create = []
+            for barcode, name in products_data.items():
+                if barcode not in existing_products_dict:
+                    products_to_create.append(
+                        Product(barcode=barcode, name=name))
+            Product.objects.bulk_create(products_to_create)
+            all_products = Product.objects.filter(
+                barcode__in=products_data.keys())
+            products_dict = {p.barcode: p for p in all_products}
 
-                # stock transactions
-                stock_transaction, created = StockTransaction.objects.get_or_create(
-                    stock_date=stock_date, product=prod, warehouse=ware)
-                if not stock_transaction:
-                    stock_transaction = StockTransaction.objects.create(
-                        stock_date=stock_date, product=prod, warehouse=ware, quantity=quantity)
-                stock_transaction.quantity = quantity
-                stock_transaction.save()
+            # Bulk get or create Regions
+            existing_regions = Region.objects.filter(
+                code__in=regions_data.keys())
+            existing_regions_dict = {r.code: r for r in existing_regions}
+            regions_to_create = []
+            for code, name in regions_data.items():
+                if code not in existing_regions_dict:
+                    regions_to_create.append(Region(code=code, name=name))
+            Region.objects.bulk_create(regions_to_create)
+            all_regions = Region.objects.filter(code__in=regions_data.keys())
+            regions_dict = {r.code: r for r in all_regions}
+
+            # Bulk get or create Warehouses
+            existing_warehouses = Warehouse.objects.filter(
+                code__in=warehouses_data.keys())
+            existing_warehouses_dict = {w.code: w for w in existing_warehouses}
+            warehouses_to_create = []
+            for code, data in warehouses_data.items():
+                if code not in existing_warehouses_dict:
+                    region_obj = regions_dict.get(data['region_code'])
+                    warehouses_to_create.append(
+                        Warehouse(code=code, name=data['name'], region=region_obj))
+            Warehouse.objects.bulk_create(warehouses_to_create)
+            all_warehouses = Warehouse.objects.filter(
+                code__in=warehouses_data.keys())
+            warehouses_dict = {w.code: w for w in all_warehouses}
+
+            # Bulk get or create StockTransactions
+            existing_stock_transactions = StockTransaction.objects.filter(
+                stock_date__in=[s['stock_date']
+                                for s in stock_transactions_data],
+                product__barcode__in=[s['product_barcode']
+                                      for s in stock_transactions_data],
+                warehouse__code__in=[s['warehouse_code']
+                                     for s in stock_transactions_data]
+            )
+            existing_stock_transactions_dict = {}
+            for st in existing_stock_transactions:
+                key = (st.stock_date, st.product.barcode, st.warehouse.code)
+                existing_stock_transactions_dict[key] = st
+
+            stock_transactions_to_create = []
+            stock_transactions_to_update = []
+            for s in stock_transactions_data:
+                key = (s['stock_date'], s['product_barcode'],
+                       s['warehouse_code'])
+                if key in existing_stock_transactions_dict:
+                    st_obj = existing_stock_transactions_dict[key]
+                    st_obj.quantity = s['quantity']
+                    stock_transactions_to_update.append(st_obj)
+                else:
+                    stock_transactions_to_create.append(StockTransaction(
+                        stock_date=s['stock_date'],
+                        product=products_dict[s['product_barcode']],
+                        warehouse=warehouses_dict[s['warehouse_code']],
+                        quantity=s['quantity']
+                    ))
+
+            if stock_transactions_to_create:
+                StockTransaction.objects.bulk_create(
+                    stock_transactions_to_create)
+            if stock_transactions_to_update:
+                StockTransaction.objects.bulk_update(
+                    stock_transactions_to_update, ['quantity'])
 
         else:
             return HttpResponse('Unsupported file format')
-        # HttpResponse('Data loaded successfully')
         return render(request, 'index.html')
     return render(request, 'load_stock.html')
