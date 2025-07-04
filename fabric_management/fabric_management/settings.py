@@ -39,10 +39,11 @@ INSTALLED_APPS = [
 
 
     # Наше приложение
-    'api.apps.ApiConfig',
+    # 'api.apps.ApiConfig',
     'warehouse.apps.WarehouseConfig',
     'sales.apps.SalesConfig',
     'main.apps.MainConfig',
+    'blueprints.apps.BlueprintsConfig',
 
     # стандартные
     'django.contrib.admin',

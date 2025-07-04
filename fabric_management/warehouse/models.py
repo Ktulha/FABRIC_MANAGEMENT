@@ -18,6 +18,7 @@ class Warehouse(models.Model):
 class StockTransaction(models.Model):
     stock_date = models.DateField(auto_now_add=False, auto_now=False)
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, related_name='stocks', on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, editable=False)

@@ -45,7 +45,8 @@ class SaleObject(models.Model):
 class Sale(models.Model):
     sale_object = models.ForeignKey(SaleObject, on_delete=models.CASCADE)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, related_name='sales', on_delete=models.CASCADE)
     date = models.DateField(auto_now=False, auto_now_add=False)
     quantity = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now=True)

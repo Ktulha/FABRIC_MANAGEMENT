@@ -8,6 +8,7 @@ import numpy as np
 
 from warehouse.models import StockTransaction, Warehouse
 from sales.models import Product, Region, Sale, SaleObject
+from blueprints.models import *
 
 
 def index(request):
@@ -33,7 +34,7 @@ def load_sales(request):
                 region = row['region']
                 region_code = row['region_code']
                 product = row['product'].replace('\\', '')
-                print(product)
+                # print(product)
                 product_barcode = row['product_barcode']
                 date = datetime.datetime.strptime(
                     row['date'], '%d.%m.%Y').date()
@@ -145,13 +146,15 @@ def load_sales(request):
                 Sale.objects.bulk_create(sales_to_create)
             if sales_to_update:
                 Sale.objects.bulk_update(sales_to_update, ['quantity'])
-
+            print(' Sales data loaded successfully')
+            return render(request, 'index.html')
         elif file.name.endswith('.json'):
             # TODO JSON format data file load script
             pass
 
         else:
             return HttpResponse('Unsupported file format')
+
         return render(request, 'index.html')
     return render(request, 'load_sales.html')
 
@@ -279,5 +282,215 @@ def load_stock(request):
 
         else:
             return HttpResponse('Unsupported file format')
+        print('Stock data loaded successfully')
         return render(request, 'index.html')
     return render(request, 'load_stock.html')
+
+
+def load_blueprints(request):
+    if request.method == 'POST':
+        file = request.FILES['file']
+        if file.name.endswith('.csv'):
+            delim = ';'
+            decoded_file = file.read().decode('utf-8-sig').splitlines()
+            reader = csv.DictReader(decoded_file, delimiter=delim)
+            units_data = {}
+            materials_data = {}
+            blueprints_data = {}
+            owners_data = {}
+            blueprint_items_data = []
+
+            for row in reader:
+                unit_name = row['unit']
+                owner_name = row['owner']
+                blueprint_name = row['blueprint']
+                material = row['material']
+                barcode = row['barcode']
+                quantity = row['quantity']
+                material_bp = row['material_bp']
+                if material_bp == 'nan':
+                    material_bp = None
+
+                if barcode == 'nan':
+                    barcode = None
+
+                # print(unit_name, owner_name, blueprint_name,
+                    #   material, barcode, quantity)
+
+                units_data[unit_name] = unit_name
+
+                if owner_name:
+                    owners_data[owner_name] = {
+                        'owner': owner_name,
+                        'barcode': barcode
+                    }
+
+                    if owner_name not in materials_data:
+                        materials_data[owner_name] = {
+                            'name': owner_name, 'product_link': None, 'measure_unit': unit_name}
+
+                    if barcode:
+                        # print(owner_name, barcode)
+                        product = Product.objects.filter(
+                            barcode=barcode).first()
+
+                        if product:
+                            materials_data[owner_name].update(
+                                {'name': product.name, 'product_link': product})
+                        else:
+                            product = Product.objects.create(
+                                name=owner_name, barcode=barcode)
+
+                if material:
+                    if material not in materials_data:
+                        materials_data[material] = {
+                            'name': material,
+                            'product_link': None,
+                            'measure_unit': unit_name
+                        }
+
+                if blueprint_name:
+                    if blueprint_name not in blueprints_data:
+                        blueprints_data[blueprint_name] = {
+                            'name': blueprint_name,
+                            'owner': owner_name
+                        }
+                if material_bp:
+                    if material_bp not in blueprints_data:
+                        blueprints_data[material_bp] = {
+                            'name': material_bp,
+                            'owner': material
+                        }
+
+                blueprint_items_data.append({
+                    'blueprint': blueprint_name,
+                    'material': material,
+                    'material_bp': material_bp,
+                    'amount': quantity
+                })
+            print('file read complete')
+            existing_units_dict = {}
+
+            existing_units = Unit.objects.filter(name__in=units_data.keys())
+            existing_units_dict = {u.name: u for u in existing_units}
+
+            units_to_create = []
+            for unit_name in units_data.keys():
+                if unit_name not in existing_units_dict:
+                    units_to_create.append(
+                        Unit(name=unit_name))
+            Unit.objects.bulk_create(units_to_create)
+            all_units = Unit.objects.filter(
+                name__in=units_data.keys()
+            )
+            unit_dict = {u.name: u for u in all_units
+                         }
+            print('units created. To create: ', len(units_to_create))
+
+            existing_materials = Material.objects.filter(
+                name__in=materials_data.keys()
+            )
+            existing_materials_dict = {m.name: m for m in existing_materials}
+            materials_to_create = []
+            for material_name, data in materials_data.items():
+                if material_name not in existing_materials_dict:
+                    print(data)
+                    materials_to_create.append(
+                        Material(name=data['name'],
+                                 product_link=data['product_link'],
+                                 measure_unit=unit_dict.get(
+                                     data['measure_unit']) if data['measure_unit'] else None
+                                 )
+                    )
+            Material.objects.bulk_create(materials_to_create)
+            all_materials = Material.objects.filter(
+                name__in=materials_data.keys()
+            )
+            materials_dict = {
+                m.name: m for m in all_materials
+            }
+            print('materials created. To create: ', len(materials_to_create))
+
+            existing_blueprints = Blueprint.objects.filter(
+                name__in=blueprints_data.keys()
+            )
+            existing_blueprints_dict = {
+                b.name: b for b in existing_blueprints
+            }
+            blueprints_to_create = []
+            for blueprint_name, data in blueprints_data.items():
+                if blueprint_name not in existing_blueprints_dict:
+                    owner_obj = materials_dict.get(data['owner'])
+                    # print(                         f'{blueprint_name} >> {owner_obj}')
+                    blueprints_to_create.append(
+                        Blueprint(
+                            name=blueprint_name,
+                            owner=owner_obj
+                        )
+                    )
+
+            Blueprint.objects.bulk_create(
+                blueprints_to_create
+            )
+            all_blueprints = Blueprint.objects.filter(
+                name__in=blueprints_data.keys()
+            )
+            blueprints_dict = {
+                b.name: b for b in all_blueprints
+            }
+            print('blueprints created. To create: ', len(blueprints_to_create))
+
+            existing_blueprint_items = BlueprintItem.objects.filter(
+                blueprint__name__in=[i['blueprint']
+                                     for i in blueprint_items_data],
+                material__name__in=[i['material']
+                                    for i in blueprint_items_data],
+                ItemBlueprint__name__in=[i['material_bp']
+                                         for i in blueprint_items_data],
+            )
+            existing_blueprint_items_dict = {}
+            for b in existing_blueprint_items:
+                key = (
+                    b.blueprint.name,
+                    b.material.name,
+                    b.material_bp.name if b.material_bp else None,
+                )
+                existing_blueprint_items_dict[key] = b
+            # print(existing_blueprint_items_dict)
+            blueprint_items_to_create = []
+            blueprint_items_to_update = []
+            for b in blueprint_items_data:
+                key = (
+                    b['blueprint'],
+                    b['material'],
+                    b['material_bp'] if b['material_bp'] else None
+                )
+                if key in existing_blueprint_items_dict:
+                    item_obj = existing_blueprint_items_dict[key]
+                    if item_obj.amount != float(b['amount']):
+                        item_obj.amount = float(b['amount'])
+                        blueprint_items_to_update.append(item_obj)
+                else:
+                    blueprint_items_to_create.append(
+                        BlueprintItem(
+                            blueprint=blueprints_dict[b['blueprint']],
+                            material=materials_dict[b['material']],
+                            ItemBlueprint=blueprints_dict[b['material_bp']
+                                                          ] if b['material_bp'] else None,
+                            amount=float(b['amount'])
+                        )
+                    )
+                # print(
+                #     f'({b["blueprint"]}, {b["material"]}) >>({blueprints_dict[b['blueprint']]},{materials_dict[b['material']]} )>>{b["amount"]}')
+            if blueprint_items_to_create:
+                BlueprintItem.objects.bulk_create(blueprint_items_to_create)
+            if blueprint_items_to_update:
+                BlueprintItem.objects.bulk_update(
+                    blueprint_items_to_update,
+                    ['amount']
+                )
+
+        else:
+            return HttpResponse('Unsupported file format')
+        return render(request, 'index.html')
+    return render(request, 'load_blueprints.html')
