@@ -16,7 +16,15 @@ class ShortMaterialSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'blueprint', 'measure_unit')
 
 
+class ShortBlueprintSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Blueprint
+        fields = ('id', 'name')
+
+
 class MaterialSerializer(serializers.ModelSerializer):
+    blueprint = ShortBlueprintSerializer(many=True, read_only=True)
+
     class Meta:
         model = Material
         fields = '__all__'

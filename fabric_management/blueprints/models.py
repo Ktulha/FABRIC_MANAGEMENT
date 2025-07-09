@@ -33,7 +33,7 @@ class Material(models.Model):
 
     def __save__(self, *args, **kwargs):
         if self.pk:
-            old_values = Product.objects.get(pk=self.pk)
+            old_values = Material.objects.get(pk=self.pk)
             self.last_values = f'product_link:{old_values.product_link},name:{old_values.name},supplement_method:{old_values.supplement_method},item_type:{old_values.item_type},shipment_period:{old_values.shipment_period},measure_unit:{old_values.measure_unit}'
         super().save(*args, **kwargs)
 
@@ -50,6 +50,7 @@ class Blueprint(models.Model):
         auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_values = models.TextField(null=True)
+    barcode = models.CharField(max_length=255, null=True)
 
     def __save__(self, *args, **kwargs):
         if self.pk:
@@ -58,7 +59,7 @@ class Blueprint(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.name}' + (f' ({self.barcode})' if self.barcode else '')
 
 
 class BlueprintItem(models.Model):

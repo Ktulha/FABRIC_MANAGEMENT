@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'sales.apps.SalesConfig',
     'main.apps.MainConfig',
     'blueprints.apps.BlueprintsConfig',
+    'ui_app.apps.UiAppConfig',
+
 
     # стандартные
     'django.contrib.admin',
@@ -150,6 +152,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static', BASE_DIR / 'ui_app/templates/src']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MEDIA_URL = 'uploads/'
 
 # Default primary key field type

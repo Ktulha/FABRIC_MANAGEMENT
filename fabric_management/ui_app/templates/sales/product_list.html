@@ -1,0 +1,30 @@
+{% extends 'base/base_template.html' %}
+
+{% block content %}
+
+<h2> Products </h2>
+
+<ul>
+    {% for material in object_list %}
+        <li> {{ material.name }}  
+            {% if material.blueprint %}
+            <h3>Blueprints</h3>
+           <ul>
+           {% for blueprint in material.blueprint.all %}
+           <li> {{ blueprint.name }}
+            <ul>
+            {% for item in blueprint.blueprint_items.all %}
+                <li>
+                   {{ item.pk }} {{ item.material.name }}({{item.material.pk}}) - {{ item.amount }} ({{ item.ItemBlueprint.pk }})
+                </li>
+            {% endfor %}
+            </ul>
+           </li>
+           {% endfor %}
+            </ul>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

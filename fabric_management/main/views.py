@@ -313,6 +313,8 @@ def load_blueprints(request):
 
                 if barcode == 'nan':
                     barcode = None
+                if barcode:
+                    blueprint_name = f'{blueprint_name} ({barcode})'
 
                 # print(unit_name, owner_name, blueprint_name,
                     #   material, barcode, quantity)
@@ -353,13 +355,19 @@ def load_blueprints(request):
                     if blueprint_name not in blueprints_data:
                         blueprints_data[blueprint_name] = {
                             'name': blueprint_name,
-                            'owner': owner_name
+                            'owner': owner_name,
+                            'barcode': barcode
                         }
+                    else:
+                        if barcode:
+                            blueprints_data[blueprint_name].update(
+                                {'barcode': barcode})
                 if material_bp:
                     if material_bp not in blueprints_data:
                         blueprints_data[material_bp] = {
                             'name': material_bp,
-                            'owner': material
+                            'owner': material,
+                            'barcode': None
                         }
 
                 blueprint_items_data.append({
@@ -394,7 +402,7 @@ def load_blueprints(request):
             materials_to_create = []
             for material_name, data in materials_data.items():
                 if material_name not in existing_materials_dict:
-                    print(data)
+                    # print(data)
                     materials_to_create.append(
                         Material(name=data['name'],
                                  product_link=data['product_link'],
@@ -421,11 +429,12 @@ def load_blueprints(request):
             for blueprint_name, data in blueprints_data.items():
                 if blueprint_name not in existing_blueprints_dict:
                     owner_obj = materials_dict.get(data['owner'])
-                    # print(                         f'{blueprint_name} >> {owner_obj}')
+                    # print(data)
                     blueprints_to_create.append(
                         Blueprint(
                             name=blueprint_name,
-                            owner=owner_obj
+                            owner=owner_obj,
+                            barcode=data['barcode']
                         )
                     )
 
@@ -448,15 +457,18 @@ def load_blueprints(request):
                 ItemBlueprint__name__in=[i['material_bp']
                                          for i in blueprint_items_data],
             )
+
             existing_blueprint_items_dict = {}
+
             for b in existing_blueprint_items:
                 key = (
                     b.blueprint.name,
                     b.material.name,
-                    b.material_bp.name if b.material_bp else None,
+                    b.ItemBlueprint.name if b.ItemBlueprint else None,
                 )
                 existing_blueprint_items_dict[key] = b
-            # print(existing_blueprint_items_dict)
+            print('existing blueprint items', len(
+                existing_blueprint_items_dict))
             blueprint_items_to_create = []
             blueprint_items_to_update = []
             for b in blueprint_items_data:
@@ -480,8 +492,7 @@ def load_blueprints(request):
                             amount=float(b['amount'])
                         )
                     )
-                # print(
-                #     f'({b["blueprint"]}, {b["material"]}) >>({blueprints_dict[b['blueprint']]},{materials_dict[b['material']]} )>>{b["amount"]}')
+
             if blueprint_items_to_create:
                 BlueprintItem.objects.bulk_create(blueprint_items_to_create)
             if blueprint_items_to_update:
