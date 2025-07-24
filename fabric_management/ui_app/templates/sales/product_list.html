@@ -6,9 +6,9 @@
 
 <ul>
     {% for material in object_list %}
-        <li> {{ material.name }}  
+        <li><h4> {{ material.name }}  </h4>
             {% if material.blueprint %}
-            <h3>Blueprints</h3>
+            <h5>Blueprints</h5>
            <ul>
            {% for blueprint in material.blueprint.all %}
            <li> {{ blueprint.name }}

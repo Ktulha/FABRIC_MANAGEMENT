@@ -1,7 +1,7 @@
 import datetime
 from os import name
 import csv
-import json
+import pandas as pd
 from django.shortcuts import render
 from django.http import HttpResponse
 import numpy as np
@@ -18,9 +18,18 @@ def index(request):
 def load_sales(request):
     if request.method == 'POST':
         file = request.FILES['file']
-        if file.name.endswith('.csv'):
-            delim = ';'
+        if file.name.endswith(('.csv', '.txt')):
+            delim = '\t'
             decoded_file = file.read().decode('utf-8-sig').splitlines()
+            header_row = decoded_file[0]
+            print(header_row)
+            # 'День.Начало дня'
+            # 'Склад'
+            # 'Номенклатура'
+            # 'Характеристика'
+            # 'Штрихкод'
+            # 'Количество'
+            decoded_file[0] = 'date\tsale_object\tproduct\tproduct_variant\tproduct_barcode\tquantity'
             reader = csv.DictReader(decoded_file, delimiter=delim)
 
             # Collect data from CSV
@@ -30,22 +39,25 @@ def load_sales(request):
             sales_data = []
 
             for row in reader:
+                # print(row)
                 sale_object = row['sale_object']
-                region = row['region']
-                region_code = row['region_code']
-                product = row['product'].replace('\\', '')
+                if sale_object == '' or not sale_object:
+                    continue
+                region_code = sale_object.split('-')[0][-2:]
+                region = region_code+'-'
+                # region = row['region']
+                # region_code = row['region_code']
+                product = row['product'].replace(
+                    '\\', '')+', '+row['product_variant']
                 # print(product)
                 product_barcode = row['product_barcode']
                 date = datetime.datetime.strptime(
                     row['date'], '%d.%m.%Y').date()
-                quantity = float(row['quantity'].replace(',', '.'))
-
-                if not quantity or quantity == np.nan:
+                quantity = row['quantity']
+                if quantity == '' or not quantity:
                     quantity = 0
-                try:
-                    quantity = 0+int(quantity)
-                except:
-                    quantity = 0
+                else:
+                    quantity = float(row['quantity'].replace(',', '.'))
 
                 products_data[product_barcode] = product
                 regions_data[region_code] = region
@@ -119,6 +131,7 @@ def load_sales(request):
                                        for s in sales_data]
             )
             existing_sales_dict = {}
+            print(f'existing sales : {len(existing_sales)}')
             for sale in existing_sales:
                 key = (sale.date, sale.region.code,
                        sale.product.barcode, sale.sale_object.name)
@@ -141,6 +154,8 @@ def load_sales(request):
                         sale_object=sale_objects_dict[s['sale_object_name']],
                         quantity=s['quantity']
                     ))
+            print(f'sales to create : {len(sales_to_create)}',
+                  f' sales to update : {len(sales_to_update)}')
 
             if sales_to_create:
                 Sale.objects.bulk_create(sales_to_create)
@@ -162,9 +177,12 @@ def load_sales(request):
 def load_stock(request):
     if request.method == 'POST':
         file = request.FILES['file']
-        if file.name.endswith('.csv'):
-            delim = ';'
+        if file.name.endswith(('.csv', '.txt')):
+            delim = '\t'
             decoded_file = file.read().decode('utf-8-sig').splitlines()
+            print(decoded_file[0])
+            decoded_file[0] = 'stock_date\twarehouse\tproduct\tproduct_variant\tproduct_barcode\tquantity'
+            print(decoded_file[0])
             reader = csv.DictReader(decoded_file, delimiter=delim)
 
             # Collect data from CSV
@@ -174,16 +192,20 @@ def load_stock(request):
             stock_transactions_data = []
 
             for row in reader:
+                warehouse = row['warehouse']
+                if not warehouse or warehouse == '':
+                    continue
                 stock_date = datetime.datetime.strptime(
                     row['stock_date'], '%d.%m.%Y').date()
                 product_barcode = row['product_barcode']
-                product = row['product']
-                region = row['region']
-                region_code = row['region_code']
-                warehouse = row['warehouse']
-                warehouse_code = row['warehouse_code']
+                product = row['product']+', '+row['product_variant']
+                region = warehouse.split('-')[0][-2:]
+
+                region_code = region+'-'
+                wh = warehouse.split('-')
+                warehouse_code = wh[0][-2:]+'-'+wh[1]+'-'+wh[2][:3]
                 quantity = row['quantity']
-                if quantity:
+                if quantity or quantity != '':
                     quantity = float(row['quantity'].replace(',', '.'))
                 else:
                     quantity = 0
@@ -272,6 +294,8 @@ def load_stock(request):
                         warehouse=warehouses_dict[s['warehouse_code']],
                         quantity=s['quantity']
                     ))
+            print('to create: ', len(stock_transactions_to_create),
+                  ' to update: ', len(stock_transactions_to_update))
 
             if stock_transactions_to_create:
                 StockTransaction.objects.bulk_create(
@@ -290,9 +314,12 @@ def load_stock(request):
 def load_blueprints(request):
     if request.method == 'POST':
         file = request.FILES['file']
-        if file.name.endswith('.csv'):
-            delim = ';'
+        if file.name.endswith(('.csv', '.txt')):
+            delim = '\t'
             decoded_file = file.read().decode('utf-8-sig').splitlines()
+            print(decoded_file[0])
+            # 'owner','blueprint','material','material_bp','quantity','unit','barcode'
+            decoded_file[0] = 'owner\towner_variant\tblueprint\tmaterial\tmaterial_variant\tmaterial_bp\tquantity\towner_quantity\tbarcode\tunit'
             reader = csv.DictReader(decoded_file, delimiter=delim)
             units_data = {}
             materials_data = {}
@@ -302,11 +329,22 @@ def load_blueprints(request):
 
             for row in reader:
                 unit_name = row['unit']
-                owner_name = row['owner']
+                owner_name = row['owner']+', '+row['owner_variant']
                 blueprint_name = row['blueprint']
-                material = row['material']
+                if not blueprint_name or blueprint_name == '':
+                    continue
+                material = row['material']+', '+row['material_variant']
+
                 barcode = row['barcode']
                 quantity = row['quantity']
+                if quantity or quantity != '':
+                    if ',' in quantity:
+                        quantity = float(quantity.replace(',', '.'))
+                    else:
+                        quantity = float(quantity)
+                else:
+                    continue
+
                 material_bp = row['material_bp']
                 if material_bp == 'nan':
                     material_bp = None
