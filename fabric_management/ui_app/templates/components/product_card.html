@@ -1,0 +1,21 @@
+<div class="card" style="width: 22rem;">
+    
+    <div class="card-header">
+      <h5 class="card-title">{{ product.name }}</h5>  
+        </div>
+    <img src= {% if product.image %} "../../uploads/{{product.image}}" {% else %} "../../uploads/products/no_image.png" {% endif %} class="card-img-top" alt={{product.name}}>
+<div class="card-body">
+    barcode: {{ product.barcode }}
+    description: {{ product.description }}
+    {% if product.tags %}
+    <ul>
+    {% for tag in product.tags.all  %}
+    <li> {{ tag.tag }} </li>
+    {% endfor %}
+    </ul>
+    {% endif %}
+    
+   
+
+</div>
+</div>

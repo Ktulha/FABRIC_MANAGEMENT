@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'blueprints.apps.BlueprintsConfig',
     'ui_app.apps.UiAppConfig',
+    'tags.apps.TagsConfig',
 
 
     # стандартные

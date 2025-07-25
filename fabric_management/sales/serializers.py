@@ -39,8 +39,8 @@ class SaleSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    sales = SaleSerializer(many=True)
-    stocks = StockTransactionSerializer(many=True)
+    sales = SaleSerializer(many=True, read_only=True)
+    stocks = StockTransactionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product

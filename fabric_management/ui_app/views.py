@@ -17,5 +17,5 @@ def index(request):
 
 
 class ProductListView(ListView):
-    queryset = Material.objects.all()
-    template_name = 'sales/product_list.html'
+    model = Product
+    template_name = 'html/product_list.html'

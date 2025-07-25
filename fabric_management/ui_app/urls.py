@@ -7,6 +7,7 @@ urlpatterns = [
     # path('login/', views.login),
     # path('logout/', views.logout),
     # path('register/', views.register),
-    path('products/', views.ProductListView.as_view(), name='products'),
+    path('products/',
+         views.ProductListView.as_view(), name='products'),
 
 ]
