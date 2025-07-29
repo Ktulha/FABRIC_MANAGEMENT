@@ -23,7 +23,8 @@ class Tag(models.Model):
 class ProductTag(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name='tags')
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, related_name='products')
 
     class Meta:
         unique_together = ['product', 'tag']
@@ -32,7 +33,8 @@ class ProductTag(models.Model):
 class MaterialTag(models.Model):
     material = models.ForeignKey(
         Material, on_delete=models.CASCADE, related_name='tags')
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    tag = models.ForeignKey(
+        Tag, on_delete=models.CASCADE, related_name='materials')
 
     class Meta:
         unique_together = ['material', 'tag']

@@ -1,0 +1,14 @@
+                <ul>
+                {% for bp in blueprint.blueprint_items.all %}
+                    <li> {{bp.material.name}} ----- {{bp.amount}}---
+                        {% if bp.material.blueprint.first %}
+                        
+                        {% with bp.material.blueprint.first as blueprint %}
+                            {% include '../components/blueprint_iter_comp.html' %}
+                        {% endwith %}
+                            
+
+                        {% endif %}
+                        
+                {% endfor %}
+                </ul>

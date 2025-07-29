@@ -1,0 +1,14 @@
+<div class="card">
+    <div class="card-header">
+        card header
+    </div>
+    <div class="card-text">
+        <ul>
+        {% for s in product.tags.all %}
+        {% if s %}
+            <li>{{s.tag}} --({{s.tag.pk}})---<a href="{% url 'tag_products' tag=s.tag.pk %}"> {{s.tag.products.all.count}}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>   
+    </div>
+</div>

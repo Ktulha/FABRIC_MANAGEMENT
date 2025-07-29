@@ -11,11 +11,13 @@
     <title>{% block title %} Управление движением материалов  {% endblock %} </title>
 </head>
 <body>
+    <div class="container-fluid d-flex">
     {% block sidebar %} {% include 'components/sidebar.html' %} {% endblock %}
     
     
     {% block content %} {% endblock %}
     {% block footer %} {% endblock %}
+    </div>
 
 <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>    
 </body>

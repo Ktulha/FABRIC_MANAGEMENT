@@ -1,0 +1,23 @@
+Аккордион продаж в виде дерева. Фильтры по регионам и каналам продаж.
+<div class="card">
+    <div class="card-header">
+        card header
+    </div>
+    <div class="card-text">
+        <ul>
+
+    
+            {% regroup product.sales.all|dictsort:"sale_object.name" by sale_object as prod_reg %}
+
+{% for reg,sales  in prod_reg %}
+
+            <li>{{reg}}</li>
+            <ul>
+        {% for s in sales|dictsort:'date' %}
+            <li> --- {{s.date|date:"d.m.Y"}} ---  {{s.quantity}} </li>
+        {% endfor %}
+            </ul>
+{% endfor %}
+        </ul>   
+    </div>
+</div>

@@ -25,9 +25,13 @@ class Command(BaseCommand):
         # Collect tag names from products
         for product in products:
             if product.name:
-                item = product.name.upper()
+                item = product.name.upper().replace('1,5', '1.5')
                 tag_names = [tag.strip() for tag in item.split(
                     ',') if tag.strip() and len(tag.strip()) >= 3]
+                first_word = item.split(',')[0].split(
+                    ' ')[0].upper().replace(',', '')
+                if first_word and len(first_word) >= 3:
+                    tag_names.append(first_word)
                 for tag_name in tag_names:
                     tags_data[tag_name] = tag_name
                     product_tags_data[(product.pk, tag_name)] = {
@@ -38,9 +42,13 @@ class Command(BaseCommand):
         # Collect tag names from materials
         for material in materials:
             if material.name:
-                item = material.name.upper()
-                tag_names = [tag.strip() for tag in item.split(
+                item = material.name.upper().replace('1,5', '1.5')
+                tag_names = [tag.strip()for tag in item.split(
                     ',') if tag.strip() and len(tag.strip()) >= 3]
+                first_word = item.split(',')[0].split(
+                    ' ')[0].upper().replace(',', '')
+                if first_word and len(first_word) >= 3:
+                    tag_names.append(first_word)
                 for tag_name in tag_names:
                     tags_data[tag_name] = tag_name
                     material_tags_data[(material.pk, tag_name)] = {
