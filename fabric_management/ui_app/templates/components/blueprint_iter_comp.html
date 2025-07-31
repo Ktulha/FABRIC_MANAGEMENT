@@ -1,12 +1,16 @@
-                <ul>
+{% load ui_app_tags %}
+<ul>
                 {% for bp in blueprint.blueprint_items.all %}
-                    <li> {{bp.material.name}} ----- {{bp.amount}}---
+        <li class="{% if not bp.material.blueprint.first %} bg-secondary {%endif%}"  > {{bp.material.name}} ----- {%if mult%} {{bp.amount|multiply:mult}}  {%endif%} ({{bp.amount}}) ---</li>
                         {% if bp.material.blueprint.first %}
                         
-                        {% with bp.material.blueprint.first as blueprint %}
+
+                        {% with mult=bp.amount|multiply:mult %}
+                        
+                        {% with bp.material.blueprint.first as blueprint  %}
                             {% include '../components/blueprint_iter_comp.html' %}
                         {% endwith %}
-                            
+                        {% endwith %}
 
                         {% endif %}
                         

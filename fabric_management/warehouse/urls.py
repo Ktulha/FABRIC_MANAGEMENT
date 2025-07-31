@@ -1,9 +1,7 @@
-from rest_framework.routers import DefaultRouter
-from django.urls import include, path
-
-from sales.views import ProductViewSet, RegionViewSet
-
 from .views import *
+from sales.views import ProductViewSet, RegionViewSet
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
 
 router = DefaultRouter()

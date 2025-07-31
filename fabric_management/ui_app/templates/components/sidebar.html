@@ -1,4 +1,4 @@
-<div class="flex-shrink-0 p-3" style="width: 280px">
+<div class="flex-shrink-0 p-3 sticky-top" style="width: 280px">
   <a
     href="/"
     class="d-flex align-items-center pb-3 mb-3 link-body-emphasis text-decoration-none border-bottom"
@@ -6,21 +6,32 @@
     <svg class="bi pe-none me-2" width="30" height="24" aria-hidden="true">
       <use xlink:href="#bootstrap"></use>
     </svg>
-    <i class="bi bi-truck-front"></i>
-    <span class="fs-5 fw-semibold">Collapsible</span>
+    
+    <span class="fs-5 fw-semibold">На главную</span>
   </a>
   <ul class="list-unstyled ps-0">
     <li class="mb-1">
       <button
         class="btn btn-toggle d-inline-flex align-items-center rounded border-0"
         data-bs-toggle="collapse"
-        data-bs-target="#home-collapse"
+        data-bs-target="#prod-collapse"
         aria-expanded="true"
       >
-        Home
+       <i class="bi bi-cart4 me-2"></i>  Товары
       </button>
-      <div class="collapse show" id="home-collapse" style="">
+      <div class="collapse " id="prod-collapse" style="">
         <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+          <li class="ps-3">
+                  <button
+        class="btn btn-toggle d-inline-flex align-items-center rounded border-0"
+        data-bs-toggle="collapse"
+        data-bs-target="#prod-cat-collapse"
+        aria-expanded="true"
+      >
+        Категории
+      </button>
+      <div class="collapse  ps-4" id="prod-cat-collapse" style="">
+                <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 ">
           <li>
             <a
               href="#"
@@ -43,6 +54,8 @@
             >
           </li>
         </ul>
+      </div>
+    </li>
       </div>
     </li>
     <li class="mb-1">

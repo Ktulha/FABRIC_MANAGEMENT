@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import ListView
 
+from .utils import *
 
 from ui_app.forms import ProductEdit
 
@@ -18,7 +19,7 @@ def index(request):
 
 
 def product_list(request):
-    products = Product.objects.all()
+    products = Product.objects.all().order_by('name')
 
     return render(request, 'html/product_list.html', {'products': products})
 

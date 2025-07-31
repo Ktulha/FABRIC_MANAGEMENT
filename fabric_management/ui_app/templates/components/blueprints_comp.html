@@ -9,8 +9,9 @@
             
             {% with material.blueprint.first as blueprint %}
                 {{blueprint}}
+                {%with mult=1%}
                 {% include '../components/blueprint_iter_comp.html' %}
-
+                {%endwith%}
             {% endwith %}
                 
         {% endwith %}

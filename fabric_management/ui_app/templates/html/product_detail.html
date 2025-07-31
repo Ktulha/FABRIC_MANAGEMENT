@@ -1,8 +1,12 @@
 {% extends 'base/base_template.html' %}
 {% block content %}
 <div class="container">
-    <div class="row border-bottom pb-4 pt-4 mb-5">
-        <h3 class="text-center">{{ product.name }}</h3>
+    <div class="row border-bottom pb-2 pt-2 mb-5 sticky-md-top bg-body">
+
+        
+        <h3 class="text-center">
+            <button onclick="window.history.back()" class="btn btn-secondary"><i class="bi bi-arrow-left-square "></i><span class="text-center "> Назад</span></button>
+            {{ product.name }}</h3>
 
     </div>
     <div class="row border-bottom pb-4">
@@ -28,9 +32,9 @@
     
 <nav class="nav nav-tabs" id="nav-tab" role="tablist">
    <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Остатки</a>
-   <a class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Продажи</a>
+   <a class="nav-link " id="nav-profile-tab" data-bs-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Продажи</a>
    
-   <a class="nav-link " id="nav-disabled-tab" data-bs-toggle="tab" href="#nav-disabled" role="tab" aria-controls="nav-disabled" aria-disabled="false">Спецификации</a>
+   <a class="nav-link {%if product.material.first.blueprint.all%}{%else%}disabled{%endif%}" id="nav-disabled-tab" data-bs-toggle="tab" href="#nav-disabled" role="tab" aria-controls="nav-disabled" aria-disabled="{%if product.material.first.blueprint.all%}false{%else%}true{%endif%}">Спецификация</a>
    <a class="nav-link " id="nav-trend-tab" data-bs-toggle="tab" href="#nav-trend" role="tab" aria-controls="nav-trend" aria-disabled="false">Прогнозы</a>
    <a class="nav-link " id="nav-tag-tab" data-bs-toggle="tab" href="#nav-tag" role="tab" aria-controls="nav-tag" aria-disabled="false">#Тэги</a>
 </nav>
