@@ -25,7 +25,7 @@ class Product(models.Model):
         return f'{self.name}({self.barcode})'
 
     def get_absolute_url(self):
-        return reverse("product", kwargs={"product_id": self.pk})
+        return reverse("products", kwargs={"product_id": self.pk})
 
 
 class Region(models.Model):

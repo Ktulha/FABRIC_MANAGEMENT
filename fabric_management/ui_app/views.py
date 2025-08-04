@@ -2,6 +2,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.generic import ListView
 
+from blueprints.models import *
+
 from .utils import *
 
 from ui_app.forms import ProductEdit
@@ -33,3 +35,14 @@ def tag_products(request, tag):
 def product_detail(request, product_id):
     product = Product.objects.get(pk=product_id)
     return render(request, 'html/product_detail.html', {'product': product})
+
+
+def material_list(request):
+    materials = Material.objects.filter(
+        item_type='material').order_by('name')
+    return render(request, 'html/material_list.html', {'materials': materials})
+
+
+def material_detail(request, material_id):
+    material = Material.objects.get(pk=material_id)
+    return render(request, 'html/material_detail.html', {'material': material})

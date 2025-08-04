@@ -367,7 +367,7 @@ def load_blueprints(request):
 
                     if owner_name not in materials_data:
                         materials_data[owner_name] = {
-                            'name': owner_name, 'product_link': None, 'measure_unit': unit_name}
+                            'name': owner_name, 'product_link': None, 'measure_unit': unit_name, 'item_type': 'semi-product', 'supplement_method': 'manufactured'}
 
                     if barcode:
                         # print(owner_name, barcode)
@@ -376,7 +376,7 @@ def load_blueprints(request):
 
                         if product:
                             materials_data[owner_name].update(
-                                {'name': product.name, 'product_link': product})
+                                {'name': product.name, 'product_link': product, 'item_type': 'product', 'supplement_method': 'manufactured'})
                         else:
                             product = Product.objects.create(
                                 name=owner_name, barcode=barcode)
@@ -386,7 +386,9 @@ def load_blueprints(request):
                         materials_data[material] = {
                             'name': material,
                             'product_link': None,
-                            'measure_unit': unit_name
+                            'measure_unit': unit_name,
+                            'item_type': 'material',
+                            'supplement_method': 'raw'
                         }
 
                 if blueprint_name:
@@ -407,6 +409,13 @@ def load_blueprints(request):
                             'owner': material,
                             'barcode': None
                         }
+                        materials_data[material].update(
+                            {
+                                'item_type': 'semi-product',
+                                'supplement_method': 'manufactured'
+
+                            }
+                        )
 
                 blueprint_items_data.append({
                     'blueprint': blueprint_name,
@@ -438,17 +447,33 @@ def load_blueprints(request):
             )
             existing_materials_dict = {m.name: m for m in existing_materials}
             materials_to_create = []
+            materials_to_update = []
             for material_name, data in materials_data.items():
                 if material_name not in existing_materials_dict:
                     # print(data)
                     materials_to_create.append(
                         Material(name=data['name'],
                                  product_link=data['product_link'],
+                                 item_type=data['item_type'],
+                                 supplement_method=data['supplement_method'],
                                  measure_unit=unit_dict.get(
                                      data['measure_unit']) if data['measure_unit'] else None
                                  )
                     )
-            Material.objects.bulk_create(materials_to_create)
+                else:
+                    material_obj = existing_materials_dict[material_name]
+                    if material_obj.item_type != data['item_type'] or material_obj.supplement_method != data['supplement_method']:
+                        material_obj.item_type = data['item_type']
+                        material_obj.supplement_method = data['supplement_method']
+                        materials_to_update.append(
+                            material_obj
+                        )
+
+            if materials_to_update:
+                Material.objects.bulk_update(
+                    materials_to_update, ['item_type', 'supplement_method'])
+            if materials_to_create:
+                Material.objects.bulk_create(materials_to_create)
             all_materials = Material.objects.filter(
                 name__in=materials_data.keys()
             )

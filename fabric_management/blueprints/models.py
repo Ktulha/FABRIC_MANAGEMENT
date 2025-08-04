@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 from sales.models import Product
 
@@ -31,6 +32,8 @@ class Material(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_values = models.TextField(null=True)
 
+    image = models.ImageField(upload_to='materials', null=True)
+
     def __save__(self, *args, **kwargs):
         if self.pk:
             old_values = Material.objects.get(pk=self.pk)
@@ -39,6 +42,9 @@ class Material(models.Model):
 
     def __str__(self):
         return f'{self.name}-({self.item_type})'
+
+    def get_absolute_url(self):
+        return reverse("materials", kwargs={"material_id": self.pk})
 
 
 class Blueprint(models.Model):
@@ -83,3 +89,19 @@ class BlueprintItem(models.Model):
             old_values = BlueprintItem.objects.get(pk=self.pk)
             self.last_values = f'blueprint:{old_values.blueprint},material:{old_values.material},material_bp:{old_values.ItemBlueprint},amount:{old_values.amount}'
         super().save(*args, **kwargs)
+
+
+class MaterialStock(models.Model):
+    material = models.ForeignKey(
+        Material, related_name='material_stock', on_delete=models.CASCADE, null=True
+    )
+    warehouse = models.ForeignKey(
+        'warehouse.Warehouse', related_name='material_stock', on_delete=models.CASCADE, null=True
+    )
+    date =
+
+    class Meta:
+        unique_together = ('material', 'warehouse', 'location',)
+
+        def __str__(self):
+            return f'{self.material} ({self.warehouse})'

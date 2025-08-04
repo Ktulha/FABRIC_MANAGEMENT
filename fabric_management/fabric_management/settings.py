@@ -71,7 +71,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',              # Сортировка
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Пагинация
-    'PAGE_SIZE': 10,  # Размер страницы
+    # 'PAGE_SIZE': 10,  # Размер страницы
     'TEST_REQUEST_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
