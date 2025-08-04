@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-kv&=xs+74s1)@_4^x$&t79h$rwp6jeo7@r%3wq9y-1#(j%++0k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['fabric-management.local', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['fabric-management.local',
+                 'localhost', '127.0.0.1', '192.168.18.17']
 
 
 # Application definition
@@ -35,10 +36,19 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_filters',
-    # Наше приложение
-    'api.apps.ApiConfig',
-    'datawork.apps.DataworkConfig',
 
+
+    # Наше приложение
+    # 'api.apps.ApiConfig',
+    'warehouse.apps.WarehouseConfig',
+    'sales.apps.SalesConfig',
+    'main.apps.MainConfig',
+    'blueprints.apps.BlueprintsConfig',
+    'ui_app.apps.UiAppConfig',
+    'tags.apps.TagsConfig',
+
+
+    # стандартные
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -61,7 +71,7 @@ REST_FRAMEWORK = {
         'rest_framework.filters.OrderingFilter',              # Сортировка
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  # Пагинация
-    'PAGE_SIZE': 10,  # Размер страницы
+    # 'PAGE_SIZE': 10,  # Размер страницы
     'TEST_REQUEST_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
@@ -143,7 +153,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / 'static', BASE_DIR / 'ui_app/templates/src']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MEDIA_URL = 'uploads/'
+MEDIA_ROOT = BASE_DIR/'uploads'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

@@ -1,0 +1,21 @@
+Аккордион спецификаций в виде дерева.
+<div class="card">
+    <div class="card-header">
+        card header
+    </div>
+    <div class="card-text">
+        
+        {% with product.material.first as material %}
+            
+            {% with material.blueprint.first as blueprint %}
+                {{blueprint}}
+                {%with mult=1%}
+                {% include '../components/blueprint_iter_comp.html' %}
+                {%endwith%}
+            {% endwith %}
+                
+        {% endwith %}
+            
+ 
+    </div>
+</div>

@@ -1,0 +1,13 @@
+Аккордион остатков в виде дерева. Фильтры по регионам .
+<div class="card">
+    <div class="card-header">
+        card header
+    </div>
+    <div class="card-text">
+        <ul>
+        {% for s in product.stocks.all %}
+            <li>{{s.warehouse}} --- {{s.stock_date|date:"d.m.Y"}} ---  {{s.quantity}} </li>
+        {% endfor %}
+        </ul>   
+    </div>
+</div>

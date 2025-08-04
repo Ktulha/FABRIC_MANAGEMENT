@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Load Blueprints Data</title>
+</head>
+<body>
+    поля: {                unit_name = row['unit']
+                owner_name = row['owner']
+                blueprint_name = row['blueprint']
+                material = row['material']
+                barcode = row['barcode']
+                quantity = row['quantity']}
+<br/>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file">
+        <button type="submit">Load Data</button>
+    </form>
+</body>
+</html>

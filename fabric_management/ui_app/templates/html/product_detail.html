@@ -1,0 +1,51 @@
+{% extends 'base/base_template.html' %}
+{% block content %}
+<div class="container">
+    <div class="row border-bottom pb-2 pt-2 mb-5 sticky-md-top bg-body">
+
+        
+        <h3 class="text-center">
+            <button onclick="window.history.back()" class="btn btn-secondary"><i class="bi bi-arrow-left-square "></i><span class="text-center "> Назад</span></button>
+            {{ product.name }}</h3>
+
+    </div>
+    <div class="row border-bottom pb-4">
+        <div class="col-4">
+<img src= {% if product.image %} "{{product.image.url}}" {% else %} "/uploads/no_image.png" {% endif %} class="img-thumbnail shadow-lg" alt={{product.name}}>
+        </div>
+        <div class="col-8 d-flex flex-column">
+            <div class="item-label border-bottom pb-2 d-flex justify-content-between">
+                <span> штрхкод:</span>
+                <span>{{ product.barcode }}</span>
+            </div>
+            <div class="item-label border-bottom pb-2 d-flex justify-content-between">
+                <span> описание:</span>
+                <span>{{ product.description }}</span>
+            </div>
+            <div class="item-label border-bottom pb-2 d-flex justify-content-between">
+                <span> обновлен:</span>
+                <span>{{ product.updated_at|date:"d.m.Y" }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="row border-bottom p-4">
+    
+<nav class="nav nav-tabs" id="nav-tab" role="tablist">
+   <a class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Остатки</a>
+   <a class="nav-link " id="nav-profile-tab" data-bs-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Продажи</a>
+   
+   <a class="nav-link {%if product.material.first.blueprint.all%}{%else%}disabled{%endif%}" id="nav-disabled-tab" data-bs-toggle="tab" href="#nav-disabled" role="tab" aria-controls="nav-disabled" aria-disabled="{%if product.material.first.blueprint.all%}false{%else%}true{%endif%}">Спецификация</a>
+   <a class="nav-link " id="nav-trend-tab" data-bs-toggle="tab" href="#nav-trend" role="tab" aria-controls="nav-trend" aria-disabled="false">Прогнозы</a>
+   <a class="nav-link " id="nav-tag-tab" data-bs-toggle="tab" href="#nav-tag" role="tab" aria-controls="nav-tag" aria-disabled="false">#Тэги</a>
+</nav>
+<div class="tab-content" id="nav-tabContent">
+   <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab"> {% include '../components/stock_comp.html' %}</div>
+   <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab"> {% include '../components/sales_comp.html' %} </div>
+   <div class="tab-pane fade" id="nav-disabled" role="tabpanel" aria-labelledby="nav-disabled-tab">{% include '../components/blueprints_comp.html' %}</div>
+    <div class="tab-pane fade" id="nav-trend" role="tabpanel" aria-labelledby="nav-trend-tab">Прогнозы по проодажам. Скорость за неделю,месяц,квартал. Прогноз по расходу материалов</div>
+</div>
+<div class="tab-pane fade" id="nav-tag" role="tabpanel" aria-labelledby="nav-tag-tab">{% include '../components/tags_comp.html' %}</div>                  
+
+    </div>
+</div>
+{% endblock %}
